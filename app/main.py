@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.routers.auth import router as router_auth
+from app.routers.tasks import router as router_task
 
 
 def get_app() -> FastAPI:
@@ -17,6 +18,11 @@ def get_app() -> FastAPI:
         router_auth,
         prefix='/auth',
         tags=['Auth']
+    )
+    app.include_router(
+        router_task,
+        prefix='/tasks',
+        tags=['Tasks']
     )
 
     return app
