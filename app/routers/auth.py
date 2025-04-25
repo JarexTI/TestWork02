@@ -3,11 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.core.jwt import verify_token
 from app.db.session import get_db
-from app.schemas.user import UserCreate, UserLogin, TokenPair, TokenRefresh
-from app.services.auth_service import (register_user,
-                                       authenticate_user,
-                                       update_access_token,
-                                       generate_token_pair)
+from app.schemas.user import TokenPair, TokenRefresh, UserCreate, UserLogin
+from app.services.auth_service import (authenticate_user, generate_token_pair,
+                                       register_user, update_access_token)
 
 router = APIRouter()
 

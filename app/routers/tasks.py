@@ -1,15 +1,14 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.schemas.task import TaskCreate, TaskRead, TaskUpdate, TaskStatus
 from app.models.user import User
+from app.schemas.task import TaskCreate, TaskRead, TaskStatus, TaskUpdate
 from app.services.auth_service import get_current_user
-from app.services.task_service import (
-    create_task, update_task, get_task_list, search_tasks
-)
+from app.services.task_service import (create_task, get_task_list,
+                                       search_tasks, update_task)
 
 router = APIRouter()
 

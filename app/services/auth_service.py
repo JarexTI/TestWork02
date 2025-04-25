@@ -1,12 +1,14 @@
+from datetime import timedelta
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from app.models.user import User
-from app.core.password import get_hash_password, verify_password
-from app.core.jwt import create_token, verify_token
+
 from app.core.config import settings
+from app.core.jwt import create_token, verify_token
+from app.core.password import get_hash_password, verify_password
 from app.db.session import get_db
-from datetime import timedelta
+from app.models.user import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -25,7 +27,7 @@ def register_user(db: Session, name: str, email: str, password: str):
 
 def authenticate_user(db: Session, email: str, password: str):
     user = db.query(User).filter(User.email == email).first()
-    if not user or not verify_password(password, user_hash_pass):
+    if not user or not verify_password(password, user.hashed_password):
         return None
     return user
 

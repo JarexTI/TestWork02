@@ -1,12 +1,13 @@
+from datetime import datetime
+
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
-from sqlalchemy import select
-from datetime import datetime
 
 from app.models.task import Task
 from app.models.user import User
-from app.schemas.task import TaskCreate, TaskUpdate, TaskStatus
+from app.schemas.task import TaskCreate, TaskStatus, TaskUpdate
 
 
 async def create_task(
