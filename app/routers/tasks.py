@@ -27,25 +27,25 @@ async def update_task_view(
     task_id: int,
     task: TaskUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user)
 ):
     return await update_task(db, task_id, task, current_user)
 
 
 @router.get('/', response_model=list[TaskRead])
 async def list_tasks_view(
-    status: TaskStatus | None = Query(None),
+    task_status: TaskStatus | None = Query(None, alias='status'),
     priority: int | None = Query(None, ge=1, le=10),
     created_at: datetime | None = Query(None),
     db: AsyncSession = Depends(get_db),
     _: User = Depends(get_current_user)
 ):
-    if status is None and priority is None and created_at is None:
+    if not any([task_status, priority, created_at]):
         raise HTTPException(
-            status_code=400,
-            detail='status, priority, created_at - должен быть задан'
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Хотя бы один параметр фильтрации должен быть задан'
         )
-    return await get_task_list(db, status, priority, created_at)
+    return await get_task_list(db, task_status, priority, created_at)
 
 
 @router.get('/search', response_model=list[TaskRead])

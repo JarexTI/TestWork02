@@ -1,9 +1,9 @@
 from datetime import datetime
+from typing import Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql import func
 
 from app.models.task import Task
 from app.models.user import User
@@ -15,6 +15,9 @@ async def create_task(
     task: TaskCreate,
     current_user: User
 ) -> Task:
+    """
+    Создание новой задачи.
+    """
     new_task = Task(
         title=task.title,
         description=task.description,
@@ -31,23 +34,27 @@ async def create_task(
 async def update_task(
     db: AsyncSession,
     task_id: int,
-    task_up: TaskUpdate,
-    current_user: User,
+    task_update: TaskUpdate,
+    current_user: User
 ) -> Task:
-    query = select(Task).where(
-        Task.id == task_id,
-        Task.owner_id == current_user.id
+    """
+    Полное обновление существующей задачи.
+    """
+    result = await db.execute(
+        select(Task).where(
+            Task.id == task_id,
+            Task.owner_id == current_user.id
+        )
     )
-    result = await db.execute(query)
     task = result.scalar_one_or_none()
 
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'Задача с id {task_id} не найдена или не принадлежит Вам'
+            detail=f'Задача с id {task_id} не найдена или не принадлежит вам'
         )
 
-    for field, value in task_up.dict().items():
+    for field, value in task_update.dict().items():
         setattr(task, field, value)
 
     await db.commit()
@@ -57,14 +64,18 @@ async def update_task(
 
 async def get_task_list(
     db: AsyncSession,
-    status: TaskStatus | None = None,
-    priority: int | None = None,
-    created_at: datetime | None = None,
+    task_status: Optional[TaskStatus] = None,
+    priority: Optional[int] = None,
+    created_at: Optional[datetime] = None,
 ) -> list[Task]:
+    """
+    Получение списка задач с возможной фильтрацией по статусу,
+    приоритету и дате создания.
+    """
     query = select(Task)
 
-    if status:
-        query = query.where(Task.status == status)
+    if task_status:
+        query = query.where(Task.status == task_status)
     if priority:
         query = query.where(Task.priority == priority)
     if created_at:
@@ -78,6 +89,9 @@ async def search_tasks(
     db: AsyncSession,
     query_str: str
 ) -> list[Task]:
+    """
+    Поиск задач по подстроке в названии или описании.
+    """
     query = select(Task).where(
         Task.title.ilike(f'%{query_str}%') |
         Task.description.ilike(f'%{query_str}%')

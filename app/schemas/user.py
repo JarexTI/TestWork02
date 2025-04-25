@@ -1,21 +1,62 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserCreate(BaseModel):
-    name: str
-    email: EmailStr
-    password: str
+    """Схема для регистрации пользователя"""
+    name: str = Field(
+        ...,
+        min_length=1,
+        max_length=50,
+        description='Имя пользователя'
+    )
+    email: EmailStr = Field(
+        ...,
+        description='Электронная почта'
+    )
+    password: str = Field(
+        ...,
+        min_length=6,
+        description='Пароль (не менее 6 символов)'
+    )
 
 
 class UserLogin(BaseModel):
+    """Схема для входа пользователя"""
+    email: EmailStr = Field(
+        ...,
+        description='Электронная почта'
+    )
+    password: str = Field(
+        ...,
+        description='Пароль'
+    )
+
+
+class UserResponse(BaseModel):
+    """Схема пользователя, возвращаемая в ответе"""
+    id: int
+    name: str
     email: EmailStr
-    password: str
+
+    class Config:
+        from_attributes = True
 
 
 class TokenPair(BaseModel):
-    access_token: str
-    refresh_token: str
+    """Схема с парой токенов (access + refresh)"""
+    access_token: str = Field(
+        ...,
+        description='JWT access токен'
+    )
+    refresh_token: str = Field(
+        ...,
+        description='JWT refresh токен'
+    )
 
 
 class TokenRefresh(BaseModel):
-    refresh_token: str
+    """Схема для запроса обновления access-токена"""
+    refresh_token: str = Field(
+        ...,
+        description='Refresh токен'
+    )
